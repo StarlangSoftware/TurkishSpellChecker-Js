@@ -1,0 +1,32 @@
+{
+  "name": "nlptoolkit-spellchecker",
+  "version": "1.0.0",
+  "description": "Turkish Spell Checker Library",
+  "main": "index.js",
+  "types": "index.js",
+  "scripts": {
+    "test": "Mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StarlangSoftware/TurkishSpellChecker-Js.git"
+  },
+  "author": "Olcay Taner Yıldız",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/StarlangSoftware/TurkishSpellChecker-Js/issues"
+  },
+  "homepage": "https://github.com/StarlangSoftware/TurkishSpellChecker-Js#readme",
+  "devDependencies": {
+    "@types/mocha": "^9.0.0",
+    "mocha": "^9.1.3",
+    "nlptoolkit-corpus": "^1.0.2",
+    "nlptoolkit-datastructure": "^1.0.0",
+    "nlptoolkit-dictionary": "^1.0.2",
+    "nlptoolkit-morphologicalanalysis": "^1.0.1",
+    "nlptoolkit-ngram": "^1.0.1",
+    "nlptoolkit-xmlparser": "^1.0.4",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  }
+}
