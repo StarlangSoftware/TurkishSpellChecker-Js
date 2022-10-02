@@ -2,8 +2,12 @@ import { SpellChecker } from "./SpellChecker";
 import { Sentence } from "nlptoolkit-corpus/dist/Sentence";
 import { FsmMorphologicalAnalyzer } from "nlptoolkit-morphologicalanalysis/dist/MorphologicalAnalysis/FsmMorphologicalAnalyzer";
 import { Word } from "nlptoolkit-dictionary/dist/Dictionary/Word";
+import { Candidate } from "./Candidate";
 export declare class SimpleSpellChecker implements SpellChecker {
     protected fsm: FsmMorphologicalAnalyzer;
+    protected mergedWords: Map<string, string>;
+    protected splitWords: Map<string, string>;
+    private shortcuts;
     /**
      * The generateCandidateList method takes a String as an input. Firstly, it creates a String consists of lowercase Turkish letters
      * and an {@link Array} candidates. Then, it loops i times where i ranges from 0 to the length of given word. It gets substring
@@ -17,7 +21,7 @@ export declare class SimpleSpellChecker implements SpellChecker {
      * @param word String input.
      * @return ArrayList candidates.
      */
-    generateCandidateList(word: string): Array<string>;
+    generateCandidateList(word: string): Array<Candidate>;
     /**
      * The candidateList method takes a {@link Word} as an input and creates a candidates {@link Array} by calling generateCandidateList
      * method with given word. Then, it loop i times where i ranges from 0 to size of candidates {@link Array} and creates a
@@ -27,7 +31,7 @@ export declare class SimpleSpellChecker implements SpellChecker {
      * @param word Word input.
      * @return candidates {@link Array}.
      */
-    candidateList(word: Word): Array<string>;
+    candidateList(word: Word): Array<Candidate>;
     /**
      * A constructor of {@link SimpleSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer} as an input and
      * assigns it to the fsm variable.
@@ -47,4 +51,15 @@ export declare class SimpleSpellChecker implements SpellChecker {
      * @return Sentence result.
      */
     spellCheck(sentence: Sentence): Sentence;
+    protected forcedMisspellCheck(word: Word, result: Sentence): boolean;
+    protected forcedBackwardMergeCheck(word: Word, result: Sentence, previousWord: Word): boolean;
+    protected forcedForwardMergeCheck(word: Word, result: Sentence, nextWord: Word): boolean;
+    protected addSplitWords(multiWord: string, result: Sentence): void;
+    protected forcedSplitCheck(word: Word, result: Sentence): boolean;
+    protected forcedShortcutCheck(word: Word, result: Sentence): boolean;
+    protected mergedCandidatesList(previousWord: Word, word: Word, nextWord: Word): Array<Candidate>;
+    protected splitCandidatesList(word: Word): Array<Candidate>;
+    private loadDictionaries;
+    protected getCorrectForm(wordName: string, dictionary: Map<string, string>): string;
+    private getSplitPair;
 }

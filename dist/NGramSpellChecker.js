@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./SimpleSpellChecker", "nlptoolkit-corpus/dist/Sentence", "nlptoolkit-dictionary/dist/Dictionary/Word"], factory);
+        define(["require", "exports", "./SimpleSpellChecker", "nlptoolkit-corpus/dist/Sentence", "nlptoolkit-dictionary/dist/Dictionary/Word", "./Candidate", "./Operator"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -13,6 +13,8 @@
     const SimpleSpellChecker_1 = require("./SimpleSpellChecker");
     const Sentence_1 = require("nlptoolkit-corpus/dist/Sentence");
     const Word_1 = require("nlptoolkit-dictionary/dist/Dictionary/Word");
+    const Candidate_1 = require("./Candidate");
+    const Operator_1 = require("./Operator");
     class NGramSpellChecker extends SimpleSpellChecker_1.SimpleSpellChecker {
         /**
          * A constructor of {@link NGramSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer} and an {@link NGram}
@@ -36,7 +38,7 @@
          * @param index Index of the word
          * @return If the word is misspelled, null; otherwise the longest root word of the possible analyses.
          */
-        checkAnalysisAndSetRoot(sentence, index) {
+        checkAnalysisAndSetRootForWordAtIndex(sentence, index) {
             if (index < sentence.wordCount()) {
                 let fsmParses = this.fsm.morphologicalAnalysis(sentence.getWord(index).getName());
                 if (fsmParses.size() != 0) {
@@ -46,6 +48,18 @@
                     else {
                         return sentence.getWord(index);
                     }
+                }
+            }
+            return undefined;
+        }
+        checkAnalysisAndSetRoot(word) {
+            let fsmParses = this.fsm.morphologicalAnalysis(word);
+            if (fsmParses.size() != 0) {
+                if (this.rootNGram) {
+                    return fsmParses.getParseWithLongestRootWord().getWord();
+                }
+                else {
+                    return new Word_1.Word(word);
                 }
             }
             return undefined;
@@ -75,25 +89,75 @@
         spellCheck(sentence) {
             let previousRoot = undefined;
             let result = new Sentence_1.Sentence();
-            let root = this.checkAnalysisAndSetRoot(sentence, 0);
-            let nextRoot = this.checkAnalysisAndSetRoot(sentence, 1);
+            let root = this.checkAnalysisAndSetRootForWordAtIndex(sentence, 0);
+            let nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, 1);
             for (let i = 0; i < sentence.wordCount(); i++) {
+                let nextWord = null;
+                let previousWord = null;
+                let nextNextWord = null;
+                let previousPreviousWord = null;
                 let word = sentence.getWord(i);
+                if (i > 0) {
+                    previousWord = sentence.getWord(i - 1);
+                }
+                if (i > 1) {
+                    previousPreviousWord = sentence.getWord(i - 2);
+                }
+                if (i < sentence.wordCount() - 1) {
+                    nextWord = sentence.getWord(i + 1);
+                }
+                if (i < sentence.wordCount() - 2) {
+                    nextNextWord = sentence.getWord(i + 2);
+                }
+                if (this.forcedMisspellCheck(word, result)) {
+                    previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1);
+                    root = nextRoot;
+                    nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
+                    continue;
+                }
+                if (this.forcedBackwardMergeCheck(word, result, previousWord)) {
+                    previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1);
+                    root = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 1);
+                    nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
+                    continue;
+                }
+                if (this.forcedForwardMergeCheck(word, result, nextWord)) {
+                    i++;
+                    previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1);
+                    root = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 1);
+                    nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
+                    continue;
+                }
+                if (this.forcedSplitCheck(word, result) || this.forcedShortcutCheck(word, result)) {
+                    previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1);
+                    root = nextRoot;
+                    nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
+                    continue;
+                }
                 if (root == undefined) {
                     let candidates = this.candidateList(word);
-                    let bestCandidate = word.getName();
+                    candidates = candidates.concat(this.mergedCandidatesList(previousWord, word, nextWord));
+                    candidates = candidates.concat(this.splitCandidatesList(word));
+                    let bestCandidate = new Candidate_1.Candidate(word.getName(), Operator_1.Operator.NO_CHANGE);
                     let bestRoot = word;
                     let bestProbability = this.threshold;
                     for (let candidate of candidates) {
-                        let fsmParses = this.fsm.morphologicalAnalysis(candidate);
-                        if (this.rootNGram) {
-                            root = fsmParses.getParseWithLongestRootWord().getWord();
+                        if (candidate.getOperator() == Operator_1.Operator.SPELL_CHECK || candidate.getOperator() == Operator_1.Operator.MISSPELLED_REPLACE) {
+                            root = this.checkAnalysisAndSetRoot(candidate.getName());
                         }
-                        else {
-                            root = new Word_1.Word(candidate);
+                        if (candidate.getOperator() == Operator_1.Operator.BACKWARD_MERGE && previousWord != null && previousPreviousWord != null) {
+                            root = this.checkAnalysisAndSetRoot(previousWord.getName() + word.getName());
+                            previousRoot = this.checkAnalysisAndSetRoot(previousPreviousWord.getName());
+                        }
+                        if (candidate.getOperator() == Operator_1.Operator.FORWARD_MERGE && nextWord != null && nextNextWord != null) {
+                            root = this.checkAnalysisAndSetRoot(word.getName() + nextWord.getName());
+                            nextRoot = this.checkAnalysisAndSetRoot(nextNextWord.getName());
                         }
                         let previousProbability;
                         if (previousRoot != null) {
+                            if (candidate.getOperator() == Operator_1.Operator.SPLIT) {
+                                root = this.checkAnalysisAndSetRoot(candidate.getName().split(" ")[0]);
+                            }
                             previousProbability = this.getProbability(previousRoot.getName(), root.getName());
                         }
                         else {
@@ -101,6 +165,9 @@
                         }
                         let nextProbability;
                         if (nextRoot != undefined) {
+                            if (candidate.getOperator() == Operator_1.Operator.SPLIT) {
+                                root = this.checkAnalysisAndSetRoot(candidate.getName().split(" ")[1]);
+                            }
                             nextProbability = this.getProbability(root.getName(), nextRoot.getName());
                         }
                         else {
@@ -112,15 +179,28 @@
                             bestProbability = Math.max(previousProbability, nextProbability);
                         }
                     }
+                    if (bestCandidate.getOperator() == Operator_1.Operator.FORWARD_MERGE) {
+                        i++;
+                    }
+                    if (bestCandidate.getOperator() == Operator_1.Operator.BACKWARD_MERGE) {
+                        result.replaceWord(i - 1, new Word_1.Word(bestCandidate.getName()));
+                    }
+                    else {
+                        if (bestCandidate.getOperator() == Operator_1.Operator.SPLIT) {
+                            this.addSplitWords(bestCandidate.getName(), result);
+                        }
+                        else {
+                            result.addWord(new Word_1.Word(bestCandidate.getName()));
+                        }
+                    }
                     root = bestRoot;
-                    result.addWord(new Word_1.Word(bestCandidate));
                 }
                 else {
                     result.addWord(word);
                 }
                 previousRoot = root;
                 root = nextRoot;
-                nextRoot = this.checkAnalysisAndSetRoot(sentence, i + 2);
+                nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
             }
             return result;
         }

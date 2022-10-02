@@ -4,7 +4,7 @@ import { FsmMorphologicalAnalyzer } from "nlptoolkit-morphologicalanalysis/dist/
 import { Sentence } from "nlptoolkit-corpus/dist/Sentence";
 export declare class NGramSpellChecker extends SimpleSpellChecker {
     private nGram;
-    private rootNGram;
+    private readonly rootNGram;
     private threshold;
     /**
      * A constructor of {@link NGramSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer} and an {@link NGram}
@@ -23,6 +23,7 @@ export declare class NGramSpellChecker extends SimpleSpellChecker {
      * @param index Index of the word
      * @return If the word is misspelled, null; otherwise the longest root word of the possible analyses.
      */
+    private checkAnalysisAndSetRootForWordAtIndex;
     private checkAnalysisAndSetRoot;
     setThreshold(threshold: number): void;
     private getProbability;
