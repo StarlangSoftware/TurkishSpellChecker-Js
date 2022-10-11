@@ -145,13 +145,17 @@ export class NGramSpellChecker extends SimpleSpellChecker{
                     if (candidate.getOperator() == Operator.SPELL_CHECK || candidate.getOperator() == Operator.MISSPELLED_REPLACE){
                         root = this.checkAnalysisAndSetRoot(candidate.getName())
                     }
-                    if (candidate.getOperator() == Operator.BACKWARD_MERGE && previousWord != null && previousPreviousWord != null){
+                    if (candidate.getOperator() == Operator.BACKWARD_MERGE && previousWord != null){
                         root = this.checkAnalysisAndSetRoot(previousWord.getName() + word.getName())
-                        previousRoot = this.checkAnalysisAndSetRoot(previousPreviousWord.getName())
+                        if (previousPreviousWord != null){
+                            previousRoot = this.checkAnalysisAndSetRoot(previousPreviousWord.getName())
+                        }
                     }
-                    if (candidate.getOperator() == Operator.FORWARD_MERGE && nextWord != null && nextNextWord != null){
+                    if (candidate.getOperator() == Operator.FORWARD_MERGE && nextWord != null){
                         root = this.checkAnalysisAndSetRoot(word.getName() + nextWord.getName())
-                        nextRoot = this.checkAnalysisAndSetRoot(nextNextWord.getName())
+                        if (nextNextWord != null){
+                            nextRoot = this.checkAnalysisAndSetRoot(nextNextWord.getName())
+                        }
                     }
                     let previousProbability
                     if (previousRoot != null) {

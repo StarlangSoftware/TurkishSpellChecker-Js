@@ -145,13 +145,17 @@
                         if (candidate.getOperator() == Operator_1.Operator.SPELL_CHECK || candidate.getOperator() == Operator_1.Operator.MISSPELLED_REPLACE) {
                             root = this.checkAnalysisAndSetRoot(candidate.getName());
                         }
-                        if (candidate.getOperator() == Operator_1.Operator.BACKWARD_MERGE && previousWord != null && previousPreviousWord != null) {
+                        if (candidate.getOperator() == Operator_1.Operator.BACKWARD_MERGE && previousWord != null) {
                             root = this.checkAnalysisAndSetRoot(previousWord.getName() + word.getName());
-                            previousRoot = this.checkAnalysisAndSetRoot(previousPreviousWord.getName());
+                            if (previousPreviousWord != null) {
+                                previousRoot = this.checkAnalysisAndSetRoot(previousPreviousWord.getName());
+                            }
                         }
-                        if (candidate.getOperator() == Operator_1.Operator.FORWARD_MERGE && nextWord != null && nextNextWord != null) {
+                        if (candidate.getOperator() == Operator_1.Operator.FORWARD_MERGE && nextWord != null) {
                             root = this.checkAnalysisAndSetRoot(word.getName() + nextWord.getName());
-                            nextRoot = this.checkAnalysisAndSetRoot(nextNextWord.getName());
+                            if (nextNextWord != null) {
+                                nextRoot = this.checkAnalysisAndSetRoot(nextNextWord.getName());
+                            }
                         }
                         let previousProbability;
                         if (previousRoot != null) {
