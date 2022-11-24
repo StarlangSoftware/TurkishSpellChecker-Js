@@ -23,12 +23,11 @@
          *
          * @param fsm   {@link FsmMorphologicalAnalyzer} type input.
          * @param nGram {@link NGram} type input.
-         * @param rootNGram This parameter must be true, if the nGram is NGram generated from the root words; false otherwise.
+         * @param parameter Generic parameter of spell checking
          */
-        constructor(fsm, nGram, rootNGram) {
+        constructor(fsm, nGram, parameter) {
             super(fsm);
-            this.threshold = 0.0;
-            this.rootNGram = rootNGram;
+            this.parameter = parameter;
             this.nGram = nGram;
         }
         /**
@@ -40,13 +39,30 @@
          */
         checkAnalysisAndSetRootForWordAtIndex(sentence, index) {
             if (index < sentence.wordCount()) {
+                let wordName = sentence.getWord(index).getName();
+                if ((wordName.match(".*\\d+.*") && wordName.match(".*[a-zA-ZçöğüşıÇÖĞÜŞİ]+.*")
+                    && !wordName.includes("'")) || wordName.length <= 3) {
+                    return sentence.getWord(index);
+                }
                 let fsmParses = this.fsm.morphologicalAnalysis(sentence.getWord(index).getName());
                 if (fsmParses.size() != 0) {
-                    if (this.rootNGram) {
+                    if (this.parameter.isRootNGram()) {
                         return fsmParses.getParseWithLongestRootWord().getWord();
                     }
                     else {
                         return sentence.getWord(index);
+                    }
+                }
+                else {
+                    let upperCaseWordName = Word_1.Word.toCapital(wordName);
+                    let upperCaseFsmParses = this.fsm.morphologicalAnalysis(upperCaseWordName);
+                    if (upperCaseFsmParses.size() != 0) {
+                        if (this.parameter.isRootNGram()) {
+                            return upperCaseFsmParses.getParseWithLongestRootWord().getWord();
+                        }
+                        else {
+                            return sentence.getWord(index);
+                        }
                     }
                 }
             }
@@ -55,7 +71,7 @@
         checkAnalysisAndSetRoot(word) {
             let fsmParses = this.fsm.morphologicalAnalysis(word);
             if (fsmParses.size() != 0) {
-                if (this.rootNGram) {
+                if (this.parameter.isRootNGram()) {
                     return fsmParses.getParseWithLongestRootWord().getWord();
                 }
                 else {
@@ -63,9 +79,6 @@
                 }
             }
             return undefined;
-        }
-        setThreshold(threshold) {
-            this.threshold = threshold;
         }
         getProbability(word1, word2) {
             return this.nGram.getProbability(word1, word2);
@@ -115,32 +128,43 @@
                     nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
                     continue;
                 }
-                if (this.forcedBackwardMergeCheck(word, result, previousWord)) {
+                if (this.forcedBackwardMergeCheck(word, result, previousWord) || this.forcedSuffixMergeCheck(word, result, previousWord)) {
                     previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1);
                     root = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 1);
                     nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
                     continue;
                 }
-                if (this.forcedForwardMergeCheck(word, result, nextWord)) {
+                if (this.forcedForwardMergeCheck(word, result, nextWord) || this.forcedHyphenMergeCheck(word, result, previousWord, nextWord)) {
                     i++;
                     previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1);
                     root = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 1);
                     nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
                     continue;
                 }
-                if (this.forcedSplitCheck(word, result) || this.forcedShortcutCheck(word, result)) {
+                if (this.forcedSplitCheck(word, result) || this.forcedShortcutSplitCheck(word, result)) {
                     previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1);
                     root = nextRoot;
                     nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
                     continue;
                 }
-                if (root == undefined) {
-                    let candidates = this.candidateList(word);
+                if (this.parameter.isDeMiCheck()) {
+                    if (this.forcedDeDaSplitCheck(word, result) || this.forcedQuestionSuffixSplitCheck(word, result)) {
+                        previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1);
+                        root = nextRoot;
+                        nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2);
+                        continue;
+                    }
+                }
+                if (root == undefined || (word.getName().length <= 3 && this.fsm.morphologicalAnalysis(word.getName()).size() == 0)) {
+                    let candidates = [];
+                    if (root == undefined) {
+                        candidates = candidates.concat(this.candidateList(word));
+                        candidates = candidates.concat(this.splitCandidatesList(word));
+                    }
                     candidates = candidates.concat(this.mergedCandidatesList(previousWord, word, nextWord));
-                    candidates = candidates.concat(this.splitCandidatesList(word));
                     let bestCandidate = new Candidate_1.Candidate(word.getName(), Operator_1.Operator.NO_CHANGE);
                     let bestRoot = word;
-                    let bestProbability = this.threshold;
+                    let bestProbability = this.parameter.getThreshold();
                     for (let candidate of candidates) {
                         if (candidate.getOperator() == Operator_1.Operator.SPELL_CHECK || candidate.getOperator() == Operator_1.Operator.MISSPELLED_REPLACE) {
                             root = this.checkAnalysisAndSetRoot(candidate.getName());

@@ -6,6 +6,7 @@ import {Sentence} from "nlptoolkit-corpus/dist/Sentence";
 import {NGramSpellChecker} from "../dist/NGramSpellChecker";
 import {NGram} from "nlptoolkit-ngram/dist/NGram";
 import {NoSmoothing} from "nlptoolkit-ngram/dist/NoSmoothing";
+import {SpellCheckerParameter} from "../dist/SpellCheckerParameter";
 
 describe('NGramSpellCheckerTest', function() {
     describe('NGramSpellCheckerTest', function() {
@@ -15,7 +16,7 @@ describe('NGramSpellCheckerTest', function() {
         it('testSpellCheck', function() {
             let original = [new Sentence("demokratik cumhuriyet en kıymetli varlığımızdır"),
                 new Sentence("bu tablodaki değerler zedelenmeyecektir"),
-                new Sentence("milliyet'in geleneksel yılın sporcusu anketi 43. yaşını doldurdu"),
+                new Sentence("vakfın geleneksel yılın sporcusu anketi yeni yaşını doldurdu"),
                 new Sentence("demokrasinin icadı bu ayrımı bulandırdı"),
                 new Sentence("dışişleri müsteşarı Öymen'in 1997'nin ilk aylarında Bağdat'a gitmesi öngörülüyor"),
                 new Sentence("büyüdü , palazlandı , devleti ele geçirdi"),
@@ -26,22 +27,22 @@ describe('NGramSpellCheckerTest', function() {
                 new Sentence("minibüs durağı"),
                 new Sentence("noter belgesi"),
                 new Sentence("")];
-            let modified = [new Sentence("demokratik cumhüriyet rn kımetli varlıgımızdır"),
+            let modified = [new Sentence("demokratik cumhüriyet en kımetli varlıgımızdır"),
                 new Sentence("bu tblodaki değerler zedelenmeyecektir"),
-                new Sentence("milliyet'in geeneksel yılin spoşcusu ankşti 43. yeşını doldürdu"),
-                new Sentence("demokrasinin icşdı buf ayrmıı bulandürdı"),
+                new Sentence("vakfın geeneksel yılin spoşcusu ankşti yeni yeşını doldürdu"),
+                new Sentence("demokrasinin icşdı bu ayrmıı bulandürdı"),
                 new Sentence("dışişleri mütseşarı Öymen'in 1997'nin iljk aylğrında Bağdat'a gitmesi öngörülüyor"),
-                new Sentence("büyüdü , palazandı , devltei eöe geçridi"),
+                new Sentence("büyüdü , palazandı , devltei ele geçridi"),
                 new Sentence("her makenin cültte aklma sürdsi farlkıdır"),
-                new Sentence("yılın sno ayında 10 gazteci gözlatına alündı"),
-                new Sentence("iki piotun kulçandığı uçkata üir hotes görçv alyıor"),
+                new Sentence("yılın son ayında 10 gazteci gözlatına alündı"),
+                new Sentence("iki piotun kulçandığı uçkata bir hotes görçv alyıor"),
                 new Sentence("son deece kısütlı keilmeler çeçevesinde kendülerini uzuü cümllerle ifüde edbeiliyorlar"),
                 new Sentence("minibü durağı"),
                 new Sentence("ntoer belgesi"),
                 new Sentence("")];
-            let nGramSpellChecker = new NGramSpellChecker(fsm, nGram, true);
+            let nGramSpellChecker = new NGramSpellChecker(fsm, nGram, new SpellCheckerParameter())
             for (let i = 0; i < 13; i++){
-                assert.strictEqual(original[i].toString(), nGramSpellChecker.spellCheck(modified[i]).toString());
+                assert.strictEqual(original[i].toString(), nGramSpellChecker.spellCheck(modified[i]).toString())
             }
         });
         it('testSpellCheck2', function() {
@@ -66,17 +67,19 @@ describe('NGramSpellCheckerTest', function() {
                 new Sentence("yeniyılın sonrasında vakalarda artış oldu"),
                 new Sentence("atomik saatin 10mhz sinyali kalibrasyon hizmetlerinde referans olarka kullanılmaktadır"),
                 new Sentence("rehperimiz buı bölgedeki çıngıraklıyılan varlıgı hakkınd konustu"),
-                new Sentence("bu sno model ciha 24inç ekran büyüklüğünde ve 9kg ağırlıktadır")];
-            let nGramSpellChecker = new NGramSpellChecker(fsm, nGram, true);
+                new Sentence("bu son model ciha 24inç ekran büyüklüğünde ve 9kg ağırlıktadır")];
+            let nGramSpellChecker = new NGramSpellChecker(fsm, nGram, new SpellCheckerParameter())
             for (let i = 0; i < 11; i++){
                 assert.strictEqual(original[i].toString(), nGramSpellChecker.spellCheck(modified[i]).toString());
             }
         });
         it('testSpellCheck', function() {
-            let nGramSpellChecker = new NGramSpellChecker(fsm, nGram, false);
-            assert.strictEqual("noter hakkında", nGramSpellChecker.spellCheck(new Sentence("noter hakkınad")).toString());
-            assert.strictEqual("arçelik'in çamaşır", nGramSpellChecker.spellCheck(new Sentence("arçelik'in çamşaır")).toString());
-            assert.strictEqual("ruhsat yanında", nGramSpellChecker.spellCheck(new Sentence("ruhset yanında")).toString());
+            let parameter = new SpellCheckerParameter()
+            parameter.setRootNGram(false)
+            let nGramSpellChecker = new NGramSpellChecker(fsm, nGram, parameter)
+            assert.strictEqual("noter hakkında", nGramSpellChecker.spellCheck(new Sentence("noter hakkınad")).toString())
+            assert.strictEqual("arçelik'in çamaşır", nGramSpellChecker.spellCheck(new Sentence("arçelik'in çamşaır")).toString())
+            assert.strictEqual("ruhsat yanında", nGramSpellChecker.spellCheck(new Sentence("ruhset yanında")).toString())
         });
     });
 });

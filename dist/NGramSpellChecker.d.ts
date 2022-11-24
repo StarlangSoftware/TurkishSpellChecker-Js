@@ -2,10 +2,10 @@ import { SimpleSpellChecker } from "./SimpleSpellChecker";
 import { NGram } from "nlptoolkit-ngram/dist/NGram";
 import { FsmMorphologicalAnalyzer } from "nlptoolkit-morphologicalanalysis/dist/MorphologicalAnalysis/FsmMorphologicalAnalyzer";
 import { Sentence } from "nlptoolkit-corpus/dist/Sentence";
+import { SpellCheckerParameter } from "./SpellCheckerParameter";
 export declare class NGramSpellChecker extends SimpleSpellChecker {
     private nGram;
-    private readonly rootNGram;
-    private threshold;
+    private parameter;
     /**
      * A constructor of {@link NGramSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer} and an {@link NGram}
      * as inputs. Then, calls its super class {@link SimpleSpellChecker} with given {@link FsmMorphologicalAnalyzer} and
@@ -13,9 +13,9 @@ export declare class NGramSpellChecker extends SimpleSpellChecker {
      *
      * @param fsm   {@link FsmMorphologicalAnalyzer} type input.
      * @param nGram {@link NGram} type input.
-     * @param rootNGram This parameter must be true, if the nGram is NGram generated from the root words; false otherwise.
+     * @param parameter Generic parameter of spell checking
      */
-    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, rootNGram: boolean);
+    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter: SpellCheckerParameter);
     /**
      * Checks the morphological analysis of the given word in the given index. If there is no misspelling, it returns
      * the longest root word of the possible analyses.
@@ -25,7 +25,6 @@ export declare class NGramSpellChecker extends SimpleSpellChecker {
      */
     private checkAnalysisAndSetRootForWordAtIndex;
     private checkAnalysisAndSetRoot;
-    setThreshold(threshold: number): void;
     private getProbability;
     /**
      * The spellCheck method takes a {@link Sentence} as an input and loops i times where i ranges from 0 to size of words in given sentence.

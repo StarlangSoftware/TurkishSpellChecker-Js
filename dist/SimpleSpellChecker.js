@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "nlptoolkit-corpus/dist/Sentence", "nlptoolkit-dictionary/dist/Language/TurkishLanguage", "nlptoolkit-dictionary/dist/Dictionary/Word", "./Candidate", "./Operator", "fs"], factory);
+        define(["require", "exports", "nlptoolkit-corpus/dist/Sentence", "nlptoolkit-dictionary/dist/Language/TurkishLanguage", "nlptoolkit-dictionary/dist/Dictionary/Word", "./Candidate", "./Operator", "fs", "nlptoolkit-dictionary/dist/Dictionary/TxtWord"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -16,6 +16,7 @@
     const Candidate_1 = require("./Candidate");
     const Operator_1 = require("./Operator");
     const fs = require("fs");
+    const TxtWord_1 = require("nlptoolkit-dictionary/dist/Dictionary/TxtWord");
     class SimpleSpellChecker {
         /**
          * A constructor of {@link SimpleSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer} as an input and
@@ -28,7 +29,18 @@
             this.splitWords = new Map();
             this.shortcuts = ["cc", "cm2", "cm", "gb", "ghz", "gr", "gram", "hz", "inc", "inch", "inç",
                 "kg", "kw", "kva", "litre", "lt", "m2", "m3", "mah", "mb", "metre", "mg", "mhz", "ml", "mm", "mp", "ms",
-                "mt", "mv", "tb", "tl", "va", "volt", "watt", "ah", "hp"];
+                "mt", "mv", "tb", "tl", "va", "volt", "watt", "ah", "hp", "oz", "rpm", "dpi", "ppm", "ohm", "kwh", "kcal",
+                "kbit", "mbit", "gbit", "bit", "byte", "mbps", "gbps", "cm3", "mm2", "mm3", "khz", "ft", "db", "sn"];
+            this.conditionalShortcuts = ["g", "v", "m", "l", "w", "s"];
+            this.questionSuffixList = ["mi", "mı", "mu", "mü", "miyim", "misin", "miyiz", "midir", "miydi",
+                "mıyım", "mısın", "mıyız", "mıdır", "mıydı", "muyum", "musun", "muyuz", "mudur", "muydu", "müyüm", "müsün",
+                "müyüz", "müdür", "müydü", "miydim", "miydin", "miydik", "miymiş", "mıydım", "mıydın", "mıydık", "mıymış",
+                "muydum", "muydun", "muyduk", "muymuş", "müydüm", "müydün", "müydük", "müymüş", "misiniz", "mısınız",
+                "musunuz", "müsünüz", "miyimdir", "misindir", "miyizdir", "miydiniz", "miydiler", "miymişim", "miymişiz",
+                "mıyımdır", "mısındır", "mıyızdır", "mıydınız", "mıydılar", "mıymışım", "mıymışız", "muyumdur", "musundur",
+                "muyuzdur", "muydunuz", "muydular", "muymuşum", "muymuşuz", "müyümdür", "müsündür", "müyüzdür", "müydünüz",
+                "müydüler", "müymüşüm", "müymüşüz", "miymişsin", "miymişler", "mıymışsın", "mıymışlar", "muymuşsun",
+                "muymuşlar", "müymüşsün", "müymüşler", "misinizdir", "mısınızdır", "musunuzdur", "müsünüzdür"];
             this.fsm = fsm;
             this.loadDictionaries();
         }
@@ -119,19 +131,22 @@
                 if (i < sentence.wordCount() - 1) {
                     nextWord = sentence.getWord(i + 1);
                 }
-                if (this.forcedMisspellCheck(word, result) || this.forcedBackwardMergeCheck(word, result, previousWord)) {
+                if (this.forcedMisspellCheck(word, result) || this.forcedBackwardMergeCheck(word, result, previousWord)
+                    || this.forcedSuffixMergeCheck(word, result, previousWord)) {
                     continue;
                 }
-                if (this.forcedForwardMergeCheck(word, result, nextWord)) {
+                if (this.forcedForwardMergeCheck(word, result, nextWord) || this.forcedHyphenMergeCheck(word, result, previousWord, nextWord)) {
                     i++;
                     continue;
                 }
-                if (this.forcedSplitCheck(word, result) || this.forcedShortcutCheck(word, result)) {
+                if (this.forcedSplitCheck(word, result) || this.forcedShortcutSplitCheck(word, result)
+                    || this.forcedDeDaSplitCheck(word, result) || this.forcedQuestionSuffixSplitCheck(word, result)) {
                     continue;
                 }
                 let fsmParseList = this.fsm.morphologicalAnalysis(word.getName());
+                let upperCaseFsmParseList = this.fsm.morphologicalAnalysis(Word_1.Word.toCapital(word.getName()));
                 let newWord;
-                if (fsmParseList.size() == 0) {
+                if (fsmParseList.size() == 0 && upperCaseFsmParseList.size() == 0) {
                     let candidates = this.mergedCandidatesList(previousWord, word, nextWord);
                     if (candidates.length < 1) {
                         candidates = this.candidateList(word);
@@ -206,17 +221,117 @@
             }
             return false;
         }
-        forcedShortcutCheck(word, result) {
-            let shortcutRegex = "[0-9]+(" + this.shortcuts[0];
+        forcedShortcutSplitCheck(word, result) {
+            let shortcutRegex = "(([1-9][0-9]*)|[0])(([.]|[,])[0-9]*)?(" + this.shortcuts[0];
             for (let i = 1; i < this.shortcuts.length; i++) {
                 shortcutRegex += "|" + this.shortcuts[i];
             }
             shortcutRegex += ")";
-            if (word.getName().match(shortcutRegex)) {
+            let conditionalShortcutRegex = "(([1-9][0-9]*)|[0])(([.]|[,])[0-9]*)?(" + this.conditionalShortcuts[0];
+            for (let i = 1; i < this.conditionalShortcuts.length; i++) {
+                conditionalShortcutRegex += "|" + this.conditionalShortcuts[i];
+            }
+            conditionalShortcutRegex += ")";
+            if (word.getName().match(shortcutRegex) || word.getName().match(conditionalShortcutRegex)) {
                 let pair = this.getSplitPair(word);
                 result.addWord(new Word_1.Word(pair[0]));
                 result.addWord(new Word_1.Word(pair[1]));
                 return true;
+            }
+            return false;
+        }
+        forcedDeDaSplitCheck(word, result) {
+            let wordName = word.getName();
+            let capitalizedWordName = Word_1.Word.toCapital(wordName);
+            let txtWord = undefined;
+            if (wordName.endsWith("da") || wordName.endsWith("de")) {
+                if (this.fsm.morphologicalAnalysis(wordName).size() == 0 && this.fsm.morphologicalAnalysis(capitalizedWordName).size() == 0) {
+                    let newWordName = wordName.substring(0, wordName.length - 2);
+                    let fsmParseList = this.fsm.morphologicalAnalysis(newWordName);
+                    let txtNewWord = this.fsm.getDictionary().getWord(newWordName.toLocaleLowerCase("tr"));
+                    if (txtNewWord != undefined && txtNewWord instanceof TxtWord_1.TxtWord && txtNewWord.isProperNoun()) {
+                        if (this.fsm.morphologicalAnalysis(newWordName + "'" + "da").size() > 0) {
+                            result.addWord(new Word_1.Word(newWordName + "'" + "da"));
+                        }
+                        else {
+                            result.addWord(new Word_1.Word(newWordName + "'" + "de"));
+                        }
+                        return true;
+                    }
+                    if (fsmParseList.size() > 0) {
+                        txtWord = this.fsm.getDictionary().getWord(fsmParseList.getParseWithLongestRootWord().getWord().getName());
+                    }
+                    if (txtWord != undefined && txtWord instanceof TxtWord_1.TxtWord && !txtWord.isCode()) {
+                        result.addWord(new Word_1.Word(newWordName));
+                        if (TurkishLanguage_1.TurkishLanguage.isBackVowel(Word_1.Word.lastVowel(newWordName))) {
+                            if (txtWord.notObeysVowelHarmonyDuringAgglutination()) {
+                                result.addWord(new Word_1.Word("de"));
+                            }
+                            else {
+                                result.addWord(new Word_1.Word("da"));
+                            }
+                        }
+                        else if (txtWord.notObeysVowelHarmonyDuringAgglutination()) {
+                            result.addWord(new Word_1.Word("da"));
+                        }
+                        else {
+                            result.addWord(new Word_1.Word("de"));
+                        }
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        forcedSuffixMergeCheck(word, result, previousWord) {
+            let liList = ["li", "lı", "lu", "lü"];
+            let likList = ["lik", "lık", "luk", "lük"];
+            if (word.getName() in liList || word.getName() in likList) {
+                if (previousWord != null && previousWord.getName().match("[0-9]+")) {
+                    for (let suffix of liList) {
+                        if (word.getName().length == 2 && this.fsm.morphologicalAnalysis(previousWord.getName() + "'" + suffix).size() > 0) {
+                            result.replaceWord(result.wordCount() - 1, new Word_1.Word(previousWord.getName() + "'" + suffix));
+                            return true;
+                        }
+                    }
+                    for (let suffix of likList) {
+                        if (word.getName().length == 3 && this.fsm.morphologicalAnalysis(previousWord.getName() + "'" + suffix).size() > 0) {
+                            result.replaceWord(result.wordCount() - 1, new Word_1.Word(previousWord.getName() + "'" + suffix));
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        forcedHyphenMergeCheck(word, result, previousWord, nextWord) {
+            if (word.getName() == "-" || word.getName() == "–" || word.getName() == "—") {
+                if (previousWord != null && nextWord != null &&
+                    previousWord.getName().match("[a-zA-ZçöğüşıÇÖĞÜŞİ]+") && nextWord.getName().match("[a-zA-ZçöğüşıÇÖĞÜŞİ]+")) {
+                    let newWordName = previousWord.getName() + "-" + nextWord.getName();
+                    if (this.fsm.morphologicalAnalysis(newWordName).size() > 0) {
+                        result.replaceWord(result.wordCount() - 1, new Word_1.Word(newWordName));
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        forcedQuestionSuffixSplitCheck(word, result) {
+            let wordName = word.getName();
+            if (this.fsm.morphologicalAnalysis(wordName).size() > 0) {
+                return false;
+            }
+            for (let questionSuffix of this.questionSuffixList) {
+                if (wordName.endsWith(questionSuffix)) {
+                    let newWordName = wordName.substring(0, wordName.lastIndexOf(questionSuffix));
+                    let txtWord = this.fsm.getDictionary().getWord(newWordName);
+                    if (this.fsm.morphologicalAnalysis(newWordName).size() > 0 && txtWord != undefined && txtWord instanceof TxtWord_1.TxtWord && !txtWord.isCode()) {
+                        result.addWord(new Word_1.Word(newWordName));
+                        result.addWord(new Word_1.Word(questionSuffix));
+                        return true;
+                    }
+                }
             }
             return false;
         }
