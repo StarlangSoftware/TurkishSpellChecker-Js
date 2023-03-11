@@ -26,7 +26,7 @@ describe('NGramSpellCheckerTest', function() {
                 new Sentence("son derece kısıtlı kelimeler çerçevesinde kendilerini uzun cümlelerle ifade edebiliyorlar"),
                 new Sentence("minibüs durağı"),
                 new Sentence("noter belgesi"),
-                new Sentence("")];
+                new Sentence("bu filmi daha önce görmemiş miydik diye sordu")];
             let modified = [new Sentence("demokratik cumhüriyet en kımetli varlıgımızdır"),
                 new Sentence("bu tblodaki değerler zedelenmeyecektir"),
                 new Sentence("vakfın geeneksel yılin spoşcusu ankşti yeni yeşını doldürdu"),
@@ -39,7 +39,7 @@ describe('NGramSpellCheckerTest', function() {
                 new Sentence("son deece kısütlı keilmeler çeçevesinde kendülerini uzuü cümllerle ifüde edbeiliyorlar"),
                 new Sentence("minibü durağı"),
                 new Sentence("ntoer belgesi"),
-                new Sentence("")];
+                new Sentence("bu filmi daha önce görmemişmiydik diye sordu")];
             let nGramSpellChecker = new NGramSpellChecker(fsm, nGram, new SpellCheckerParameter())
             for (let i = 0; i < 13; i++){
                 assert.strictEqual(original[i].toString(), nGramSpellChecker.spellCheck(modified[i]).toString())
@@ -56,7 +56,11 @@ describe('NGramSpellCheckerTest', function() {
                 new Sentence("yeni yılın sonrasında vakalarda artış oldu"),
                 new Sentence("atomik saatin 10 mhz sinyali kalibrasyon hizmetlerinde referans olarak kullanılmaktadır"),
                 new Sentence("rehberimiz bu bölgedeki çıngıraklı yılan varlığı hakkında konuştu"),
-                new Sentence("bu son model cihaz 24 inç ekran büyüklüğünde ve 9 kg ağırlıktadır")];
+                new Sentence("bu son model cihaz 24 inç ekran büyüklüğünde ve 9 kg ağırlıktadır"),
+                new Sentence("bu haksızlık da unutulup gitmişti"),
+                new Sentence("4'lü tahıl zirvesi İstanbul'da gerçekleşti"),
+                new Sentence("10'luk sistemden 100'lük sisteme geçiş yapılacak"),
+                new Sentence("play-off maçlarına çıkacak takımlar belli oldu")];
             let modified = [new Sentence("yenisezon başladı"),
                 new Sentence("sırtı kara adındaki canlı , bir balıktır"),
                 new Sentence("siyahayı , ayıgiller familyasına ait bir ayı türüdür"),
@@ -67,9 +71,13 @@ describe('NGramSpellCheckerTest', function() {
                 new Sentence("yeniyılın sonrasında vakalarda artış oldu"),
                 new Sentence("atomik saatin 10mhz sinyali kalibrasyon hizmetlerinde referans olarka kullanılmaktadır"),
                 new Sentence("rehperimiz buı bölgedeki çıngıraklıyılan varlıgı hakkınd konustu"),
-                new Sentence("bu son model ciha 24inç ekran büyüklüğünde ve 9kg ağırlıktadır")];
+                new Sentence("bu son model ciha 24inç ekran büyüklüğünde ve 9kg ağırlıktadır"),
+                new Sentence("bu haksızlıkda unutulup gitmişti"),
+                new Sentence("4 lı tahıl zirvesi İstanbul'da gerçekleşti"),
+                new Sentence("10 lük sistemden 100 lık sisteme geçiş yapılacak"),
+                new Sentence("play - off maçlarına çıkacak takımlar belli oldu")];
             let nGramSpellChecker = new NGramSpellChecker(fsm, nGram, new SpellCheckerParameter())
-            for (let i = 0; i < 11; i++){
+            for (let i = 0; i < 15; i++){
                 assert.strictEqual(original[i].toString(), nGramSpellChecker.spellCheck(modified[i]).toString());
             }
         });

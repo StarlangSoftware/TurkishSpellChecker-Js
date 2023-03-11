@@ -89,9 +89,10 @@
          * {@link FsmParseList} is 0, it then removes the ith item.
          *
          * @param word Word input.
+         * @param sentence Sentence input.
          * @return candidates {@link Array}.
          */
-        candidateList(word) {
+        candidateList(word, sentence) {
             let candidates = this.generateCandidateList(word.getName());
             for (let i = 0; i < candidates.length; i++) {
                 let fsmParseList = this.fsm.morphologicalAnalysis(candidates[i].getName());
@@ -149,7 +150,7 @@
                 if (fsmParseList.size() == 0 && upperCaseFsmParseList.size() == 0) {
                     let candidates = this.mergedCandidatesList(previousWord, word, nextWord);
                     if (candidates.length < 1) {
-                        candidates = this.candidateList(word);
+                        candidates = this.candidateList(word, sentence);
                     }
                     if (candidates.length < 1) {
                         candidates = candidates.concat(this.splitCandidatesList(word));
@@ -286,7 +287,7 @@
         forcedSuffixMergeCheck(word, result, previousWord) {
             let liList = ["li", "lı", "lu", "lü"];
             let likList = ["lik", "lık", "luk", "lük"];
-            if (word.getName() in liList || word.getName() in likList) {
+            if (liList.includes(word.getName()) || likList.includes(word.getName())) {
                 if (previousWord != null && previousWord.getName().match("[0-9]+")) {
                     for (let suffix of liList) {
                         if (word.getName().length == 2 && this.fsm.morphologicalAnalysis(previousWord.getName() + "'" + suffix).size() > 0) {

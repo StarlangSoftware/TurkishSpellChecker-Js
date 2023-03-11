@@ -40,7 +40,7 @@ export class NGramSpellChecker extends SimpleSpellChecker{
         if (index < sentence.wordCount()){
             let wordName = sentence.getWord(index).getName()
             if ((wordName.match(".*\\d+.*") && wordName.match(".*[a-zA-ZçöğüşıÇÖĞÜŞİ]+.*")
-                && !wordName.includes("'")) || wordName.length <= 3) {
+                && !wordName.includes("'")) || wordName.length < this.parameter.getMinWordLength()) {
                 return sentence.getWord(index)
             }
             let fsmParses = this.fsm.morphologicalAnalysis(sentence.getWord(index).getName());
@@ -65,11 +65,26 @@ export class NGramSpellChecker extends SimpleSpellChecker{
         return undefined
     }
 
+    /**
+     * Checks the morphological analysis of the given word. If there is no misspelling, it returns
+     * the longest root word of the possible analysis.
+     *
+     * @param word Word to be analyzed.
+     * @return If the word is misspelled, null; otherwise the longest root word of the possible analysis.
+     */
     private checkAnalysisAndSetRoot(word: string): Word{
-        let fsmParses = this.fsm.morphologicalAnalysis(word)
-        if (fsmParses.size() != 0){
+        let fsmParsesOfWord = this.fsm.morphologicalAnalysis(word)
+        if (fsmParsesOfWord.size() != 0){
             if (this.parameter.isRootNGram()){
-                return fsmParses.getParseWithLongestRootWord().getWord()
+                return fsmParsesOfWord.getParseWithLongestRootWord().getWord()
+            } else {
+                return new Word(word)
+            }
+        }
+        let fsmParsesOfCapitalizedWord = this.fsm.morphologicalAnalysis(Word.toCapital(word))
+        if (fsmParsesOfCapitalizedWord.size() != 0){
+            if (this.parameter.isRootNGram()){
+                return fsmParsesOfCapitalizedWord.getParseWithLongestRootWord().getWord()
             } else {
                 return new Word(word)
             }
@@ -153,10 +168,10 @@ export class NGramSpellChecker extends SimpleSpellChecker{
                     continue
                 }
             }
-            if (root == undefined || (word.getName().length <= 3 && this.fsm.morphologicalAnalysis(word.getName()).size() == 0)){
+            if (root == undefined || (word.getName().length <= this.parameter.getMinWordLength() && this.fsm.morphologicalAnalysis(word.getName()).size() == 0)){
                 let candidates : Array<Candidate> = []
                 if (root == undefined){
-                    candidates = candidates.concat(this.candidateList(word))
+                    candidates = candidates.concat(this.candidateList(word, sentence))
                     candidates = candidates.concat(this.splitCandidatesList(word))
                 }
                 candidates = candidates.concat(this.mergedCandidatesList(previousWord, word, nextWord))
@@ -164,7 +179,8 @@ export class NGramSpellChecker extends SimpleSpellChecker{
                 let bestRoot = word
                 let bestProbability = this.parameter.getThreshold()
                 for (let candidate of candidates) {
-                    if (candidate.getOperator() == Operator.SPELL_CHECK || candidate.getOperator() == Operator.MISSPELLED_REPLACE){
+                    if (candidate.getOperator() == Operator.SPELL_CHECK || candidate.getOperator() == Operator.MISSPELLED_REPLACE
+                        || candidate.getOperator() == Operator.CONTEXT_BASED || candidate.getOperator() == Operator.TRIE_BASED){
                         root = this.checkAnalysisAndSetRoot(candidate.getName())
                     }
                     if (candidate.getOperator() == Operator.BACKWARD_MERGE && previousWord != null){
@@ -197,7 +213,7 @@ export class NGramSpellChecker extends SimpleSpellChecker{
                     } else {
                         nextProbability = 0.0
                     }
-                    if (Math.max(previousProbability, nextProbability) > bestProbability) {
+                    if (Math.max(previousProbability, nextProbability) > bestProbability || candidates.length == 1) {
                         bestCandidate = candidate
                         bestRoot = root
                         bestProbability = Math.max(previousProbability, nextProbability)

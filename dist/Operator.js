@@ -12,15 +12,22 @@
     exports.Operator = void 0;
     var Operator;
     (function (Operator) {
+        /** No change is made to the Word. */
         Operator[Operator["NO_CHANGE"] = 0] = "NO_CHANGE";
+        /** The Word is changed into a Word in the misspellings list */
         Operator[Operator["MISSPELLED_REPLACE"] = 1] = "MISSPELLED_REPLACE";
-        Operator[Operator["FORCED_MERGE"] = 2] = "FORCED_MERGE";
-        Operator[Operator["FORCED_SPLIT"] = 3] = "FORCED_SPLIT";
-        Operator[Operator["SPLIT_WITH_SHORTCUT"] = 4] = "SPLIT_WITH_SHORTCUT";
-        Operator[Operator["SPELL_CHECK"] = 5] = "SPELL_CHECK";
-        Operator[Operator["SPLIT"] = 6] = "SPLIT";
-        Operator[Operator["FORWARD_MERGE"] = 7] = "FORWARD_MERGE";
-        Operator[Operator["BACKWARD_MERGE"] = 8] = "BACKWARD_MERGE";
+        /** The Word is changed into a Candidate by deleting, adding, replacing a character or swapping two consecutive characters. */
+        Operator[Operator["SPELL_CHECK"] = 2] = "SPELL_CHECK";
+        /** The Word is split into multiple Candidates. */
+        Operator[Operator["SPLIT"] = 3] = "SPLIT";
+        /** The Word and the Word after are merged into one Candidate. */
+        Operator[Operator["FORWARD_MERGE"] = 4] = "FORWARD_MERGE";
+        /** The Word and the Word before are merged into one Candidate. */
+        Operator[Operator["BACKWARD_MERGE"] = 5] = "BACKWARD_MERGE";
+        /** The Word is changed into a Candidate based on the context based spell checking algorithm. */
+        Operator[Operator["CONTEXT_BASED"] = 6] = "CONTEXT_BASED";
+        /** The Word is changed into a Candidate based on the trie based spell checking algorithm. */
+        Operator[Operator["TRIE_BASED"] = 7] = "TRIE_BASED";
     })(Operator = exports.Operator || (exports.Operator = {}));
 });
 //# sourceMappingURL=Operator.js.map

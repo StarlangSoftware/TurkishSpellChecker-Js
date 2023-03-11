@@ -24,6 +24,13 @@ export declare class NGramSpellChecker extends SimpleSpellChecker {
      * @return If the word is misspelled, null; otherwise the longest root word of the possible analyses.
      */
     private checkAnalysisAndSetRootForWordAtIndex;
+    /**
+     * Checks the morphological analysis of the given word. If there is no misspelling, it returns
+     * the longest root word of the possible analysis.
+     *
+     * @param word Word to be analyzed.
+     * @return If the word is misspelled, null; otherwise the longest root word of the possible analysis.
+     */
     private checkAnalysisAndSetRoot;
     private getProbability;
     /**

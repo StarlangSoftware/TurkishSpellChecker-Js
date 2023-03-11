@@ -31,9 +31,10 @@ export declare class SimpleSpellChecker implements SpellChecker {
      * {@link FsmParseList} is 0, it then removes the ith item.
      *
      * @param word Word input.
+     * @param sentence Sentence input.
      * @return candidates {@link Array}.
      */
-    candidateList(word: Word): Array<Candidate>;
+    candidateList(word: Word, sentence: Sentence): Array<Candidate>;
     /**
      * A constructor of {@link SimpleSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer} as an input and
      * assigns it to the fsm variable.
