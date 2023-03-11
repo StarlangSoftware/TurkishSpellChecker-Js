@@ -11,6 +11,7 @@ import {Sentence} from "nlptoolkit-corpus/dist/Sentence";
 import {Candidate} from "./Candidate";
 import {TrieCandidate} from "./TrieCandidate";
 import * as Console from "console";
+import {Queue} from "nlptoolkit-datastructure/dist/Queue";
 
 export class TrieBasedSpellChecker extends NGramSpellChecker{
 
@@ -72,29 +73,31 @@ export class TrieBasedSpellChecker extends NGramSpellChecker{
      * @return an ArrayList of Candidate objects representing the potential candidates
      */
     candidateList(word: Word, sentence: Sentence): Array<Candidate>{
-        let candidates = new Array<TrieCandidate>()
+        let candidates = new Queue<TrieCandidate>(100000)
         let results = new Array<Candidate>()
-        candidates.push(new TrieCandidate(word.getName(), -1, 0))
+        candidates.enqueue(new TrieCandidate(word.getName(), -1, 0))
         let penaltyLimit = Math.min(word.charCount() / 2.0, 3.0)
-        while (candidates.length > 0) {
-            let candidate = candidates[0]
+        while (!candidates.isEmpty()) {
+            let candidate = candidates.peek()
             let candidateName = candidate.getName()
             if (this.trie.search(candidateName)) {
                 let itemIndex = this.searchCandidates(results, candidate)
                 if (itemIndex != -1 && (<TrieCandidate>results[itemIndex]).getCurrentPenalty() <= candidate.getCurrentPenalty()) {
-                    candidates.shift()
+                    candidates.dequeue()
                 } else {
-                    results.push(candidates.shift())
+                    results.push(candidates.dequeue())
                 }
             } else {
                 if (candidate.getCurrentPenalty() > penaltyLimit - 1 || candidate.getCurrentIndex() >= candidateName.length - 1) {
-                    candidates.shift()
+                    candidates.dequeue()
                 } else {
-                    candidate = candidates.shift()
+                    candidate = candidates.dequeue()
                     candidate.nextIndex()
-                    candidates.push(new TrieCandidate(candidate.getName(), candidate.getCurrentIndex(), candidate.getCurrentPenalty()))
+                    candidates.enqueue(new TrieCandidate(candidate.getName(), candidate.getCurrentIndex(), candidate.getCurrentPenalty()))
                     let newCandidates = this.generateTrieCandidates(candidate)
-                    candidates.push(...newCandidates)
+                    for (let newCandidate of newCandidates){
+                        candidates.enqueue(newCandidate)
+                    }
                 }
             }
         }

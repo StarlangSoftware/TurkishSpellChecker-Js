@@ -14,7 +14,7 @@ describe('TrieBasedSpellCheckerTest', function() {
         let nGram = new NGram<string>("ngram.txt");
         nGram.calculateNGramProbabilitiesSimple(new NoSmoothing<string>());
         it('testSpellCheck', function() {
-            this.timeout(60000);
+            this.timeout(10000);
             let original = [new Sentence("antibiyotik direnci bir mikroorganizmanın antibiyotiklerin etkilerine karşı durabilme yeteneğidir"),
                 new Sentence("bugünkü ortaöğretim sisteminin oluşumu Cumhuriyet döneminde gerçekleşmiştir"),
                 new Sentence("bilinçsizce dağıtılan kredilerin sorun yaratmayacağını düşünmelerinin nedeni bankaların büyüklüğünden kaynaklanıyordu"),
@@ -50,7 +50,7 @@ describe('TrieBasedSpellCheckerTest', function() {
                 new Sentence("play - off maçlarına çıkacak takımlar belli oldu"),
                 new Sentence("bu son model ciha 24inç ekran büyüklüğünde ve 9kg ağırlıktadır")];
             let trieBasedSpellChecker = new TrieBasedSpellChecker(fsm, nGram, new SpellCheckerParameter())
-            for (let i = 0; i < 4; i++){
+            for (let i = 0; i < original.length; i++){
                 assert.strictEqual(original[i].toString(), trieBasedSpellChecker.spellCheck(modified[i]).toString())
             }
         });

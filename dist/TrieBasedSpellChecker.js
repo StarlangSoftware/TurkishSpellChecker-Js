@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./NGramSpellChecker", "./Trie", "fs", "./TrieCandidate"], factory);
+        define(["require", "exports", "./NGramSpellChecker", "./Trie", "fs", "./TrieCandidate", "nlptoolkit-datastructure/dist/Queue"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -14,6 +14,7 @@
     const Trie_1 = require("./Trie");
     const fs = require("fs");
     const TrieCandidate_1 = require("./TrieCandidate");
+    const Queue_1 = require("nlptoolkit-datastructure/dist/Queue");
     class TrieBasedSpellChecker extends NGramSpellChecker_1.NGramSpellChecker {
         /**
          * A constructor of {@link TrieBasedSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer}, an {@link NGram}
@@ -67,32 +68,34 @@
          * @return an ArrayList of Candidate objects representing the potential candidates
          */
         candidateList(word, sentence) {
-            let candidates = new Array();
+            let candidates = new Queue_1.Queue(100000);
             let results = new Array();
-            candidates.push(new TrieCandidate_1.TrieCandidate(word.getName(), -1, 0));
+            candidates.enqueue(new TrieCandidate_1.TrieCandidate(word.getName(), -1, 0));
             let penaltyLimit = Math.min(word.charCount() / 2.0, 3.0);
-            while (candidates.length > 0) {
-                let candidate = candidates[0];
+            while (!candidates.isEmpty()) {
+                let candidate = candidates.peek();
                 let candidateName = candidate.getName();
                 if (this.trie.search(candidateName)) {
                     let itemIndex = this.searchCandidates(results, candidate);
                     if (itemIndex != -1 && results[itemIndex].getCurrentPenalty() <= candidate.getCurrentPenalty()) {
-                        candidates.shift();
+                        candidates.dequeue();
                     }
                     else {
-                        results.push(candidates.shift());
+                        results.push(candidates.dequeue());
                     }
                 }
                 else {
                     if (candidate.getCurrentPenalty() > penaltyLimit - 1 || candidate.getCurrentIndex() >= candidateName.length - 1) {
-                        candidates.shift();
+                        candidates.dequeue();
                     }
                     else {
-                        candidate = candidates.shift();
+                        candidate = candidates.dequeue();
                         candidate.nextIndex();
-                        candidates.push(new TrieCandidate_1.TrieCandidate(candidate.getName(), candidate.getCurrentIndex(), candidate.getCurrentPenalty()));
+                        candidates.enqueue(new TrieCandidate_1.TrieCandidate(candidate.getName(), candidate.getCurrentIndex(), candidate.getCurrentPenalty()));
                         let newCandidates = this.generateTrieCandidates(candidate);
-                        candidates.push(...newCandidates);
+                        for (let newCandidate of newCandidates) {
+                            candidates.enqueue(newCandidate);
+                        }
                     }
                 }
             }

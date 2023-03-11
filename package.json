@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "nlptoolkit-corpus": "^1.0.9",
-    "nlptoolkit-datastructure": "^1.0.4",
+    "nlptoolkit-datastructure": "^1.0.6",
     "nlptoolkit-dictionary": "^1.0.11",
     "nlptoolkit-morphologicalanalysis": "^1.0.9",
     "nlptoolkit-ngram": "^1.0.2",
