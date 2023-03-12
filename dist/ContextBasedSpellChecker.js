@@ -115,7 +115,7 @@
             let distanceMatrix = new Array();
             for (let firstIndex = 0; firstIndex <= firstLength; firstIndex++) {
                 distanceMatrix.push(new Array());
-                for (let secondIndex = 0; secondIndex >= secondLength; secondIndex++) {
+                for (let secondIndex = 0; secondIndex <= secondLength; secondIndex++) {
                     distanceMatrix[firstIndex].push(0);
                 }
             }

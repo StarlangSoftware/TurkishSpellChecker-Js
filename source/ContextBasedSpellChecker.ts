@@ -114,7 +114,7 @@ export class ContextBasedSpellChecker extends NGramSpellChecker{
         let distanceMatrix = new Array<Array<number>>()
         for (let firstIndex = 0; firstIndex <= firstLength; firstIndex++){
             distanceMatrix.push(new Array<number>())
-            for (let secondIndex = 0; secondIndex >= secondLength; secondIndex++){
+            for (let secondIndex = 0; secondIndex <= secondLength; secondIndex++){
                 distanceMatrix[firstIndex].push(0)
             }
         }
