@@ -1,6 +1,6 @@
 {
   "name": "nlptoolkit-spellchecker",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Turkish Spell Checker Library",
   "main": "index.js",
   "types": "index.js",

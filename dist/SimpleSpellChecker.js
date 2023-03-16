@@ -211,8 +211,9 @@
         }
         addSplitWords(multiWord, result) {
             let words = multiWord.split(" ");
-            result.addWord(new Word_1.Word(words[0]));
-            result.addWord(new Word_1.Word(words[1]));
+            for (let word of words) {
+                result.addWord(new Word_1.Word(word));
+            }
         }
         forcedSplitCheck(word, result) {
             let forcedReplacement = this.getCorrectForm(word.getName(), this.splitWords);
@@ -380,8 +381,10 @@
             data = fs.readFileSync("split.txt", 'utf8');
             lines = data.split("\n");
             for (let line of lines) {
-                let list = line.split(" ");
-                this.splitWords.set(list[0], list[1] + " " + list[2]);
+                let index = line.indexOf(" ");
+                let word = line.substring(0, index);
+                let splitWords = line.substring(index + 1);
+                this.splitWords.set(word, splitWords);
             }
         }
         getCorrectForm(wordName, dictionary) {

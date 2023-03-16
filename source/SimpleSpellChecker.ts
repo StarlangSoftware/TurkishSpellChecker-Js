@@ -211,8 +211,9 @@ export class SimpleSpellChecker implements SpellChecker{
 
     protected addSplitWords(multiWord: string, result: Sentence){
         let words = multiWord.split(" ")
-        result.addWord(new Word(words[0]))
-        result.addWord(new Word(words[1]))
+        for (let word of words){
+            result.addWord(new Word(word))
+        }
     }
 
     protected forcedSplitCheck(word: Word, result: Sentence): boolean{
@@ -388,8 +389,10 @@ export class SimpleSpellChecker implements SpellChecker{
         data = fs.readFileSync("split.txt", 'utf8')
         lines = data.split("\n")
         for (let line of lines){
-            let list = line.split(" ")
-            this.splitWords.set(list[0], list[1] + " " + list[2])
+            let index = line.indexOf(" ")
+            let word = line.substring(0, index)
+            let splitWords = line.substring(index + 1)
+            this.splitWords.set(word, splitWords)
         }
     }
 
