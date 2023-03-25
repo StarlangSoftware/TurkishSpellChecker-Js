@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "nlptoolkit-corpus/dist/Sentence", "nlptoolkit-dictionary/dist/Language/TurkishLanguage", "nlptoolkit-dictionary/dist/Dictionary/Word", "./Candidate", "./Operator", "fs", "nlptoolkit-dictionary/dist/Dictionary/TxtWord"], factory);
+        define(["require", "exports", "nlptoolkit-corpus/dist/Sentence", "nlptoolkit-dictionary/dist/Language/TurkishLanguage", "nlptoolkit-dictionary/dist/Dictionary/Word", "./Candidate", "./Operator", "fs", "nlptoolkit-dictionary/dist/Dictionary/TxtWord", "./SpellCheckerParameter"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -17,14 +17,16 @@
     const Operator_1 = require("./Operator");
     const fs = require("fs");
     const TxtWord_1 = require("nlptoolkit-dictionary/dist/Dictionary/TxtWord");
+    const SpellCheckerParameter_1 = require("./SpellCheckerParameter");
     class SimpleSpellChecker {
         /**
          * A constructor of {@link SimpleSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer} as an input and
          * assigns it to the fsm variable.
          *
          * @param fsm {@link FsmMorphologicalAnalyzer} type input.
+         * @param parameter {@link SpellCheckerParameter} type input.
          */
-        constructor(fsm) {
+        constructor(fsm, parameter) {
             this.mergedWords = new Map();
             this.splitWords = new Map();
             this.shortcuts = ["cc", "cm2", "cm", "gb", "ghz", "gr", "gram", "hz", "inc", "inch", "inç",
@@ -42,6 +44,12 @@
                 "müydüler", "müymüşüm", "müymüşüz", "miymişsin", "miymişler", "mıymışsın", "mıymışlar", "muymuşsun",
                 "muymuşlar", "müymüşsün", "müymüşler", "misinizdir", "mısınızdır", "musunuzdur", "müsünüzdür"];
             this.fsm = fsm;
+            if (parameter == undefined) {
+                this.parameter = new SpellCheckerParameter_1.SpellCheckerParameter();
+            }
+            else {
+                this.parameter = parameter;
+            }
             this.loadDictionaries();
         }
         /**
@@ -108,6 +116,14 @@
                 }
             }
             return candidates;
+        }
+        getFile(fileName) {
+            if (this.parameter.getDomain().length == 0) {
+                return fs.readFileSync(fileName, 'utf8');
+            }
+            else {
+                return fs.readFileSync(this.parameter.getDomain() + "_" + fileName, 'utf8');
+            }
         }
         /**
          * The spellCheck method takes a {@link Sentence} as an input and loops i times where i ranges from 0 to size of words in given sentence.
@@ -372,13 +388,13 @@
             return splitCandidates;
         }
         loadDictionaries() {
-            let data = fs.readFileSync("merged.txt", 'utf8');
+            let data = this.getFile("merged.txt");
             let lines = data.split("\n");
             for (let line of lines) {
                 let list = line.split(" ");
                 this.mergedWords.set(list[0] + " " + list[1], list[2]);
             }
-            data = fs.readFileSync("split.txt", 'utf8');
+            data = this.getFile("split.txt");
             lines = data.split("\n");
             for (let line of lines) {
                 let index = line.indexOf(" ");

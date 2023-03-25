@@ -5,7 +5,6 @@ import { Sentence } from "nlptoolkit-corpus/dist/Sentence";
 import { SpellCheckerParameter } from "./SpellCheckerParameter";
 export declare class NGramSpellChecker extends SimpleSpellChecker {
     private nGram;
-    private parameter;
     /**
      * A constructor of {@link NGramSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer} and an {@link NGram}
      * as inputs. Then, calls its super class {@link SimpleSpellChecker} with given {@link FsmMorphologicalAnalyzer} and
@@ -15,7 +14,7 @@ export declare class NGramSpellChecker extends SimpleSpellChecker {
      * @param nGram {@link NGram} type input.
      * @param parameter Generic parameter of spell checking
      */
-    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter: SpellCheckerParameter);
+    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter?: SpellCheckerParameter);
     /**
      * Checks the morphological analysis of the given word in the given index. If there is no misspelling, it returns
      * the longest root word of the possible analyses.

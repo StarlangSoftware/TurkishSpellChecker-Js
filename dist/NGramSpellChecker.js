@@ -26,8 +26,7 @@
          * @param parameter Generic parameter of spell checking
          */
         constructor(fsm, nGram, parameter) {
-            super(fsm);
-            this.parameter = parameter;
+            super(fsm, parameter);
             this.nGram = nGram;
         }
         /**

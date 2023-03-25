@@ -12,7 +12,6 @@ import {SpellCheckerParameter} from "./SpellCheckerParameter";
 export class NGramSpellChecker extends SimpleSpellChecker{
 
     private nGram: NGram<string>
-    private parameter: SpellCheckerParameter
 
     /**
      * A constructor of {@link NGramSpellChecker} class which takes a {@link FsmMorphologicalAnalyzer} and an {@link NGram}
@@ -23,9 +22,8 @@ export class NGramSpellChecker extends SimpleSpellChecker{
      * @param nGram {@link NGram} type input.
      * @param parameter Generic parameter of spell checking
      */
-    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter: SpellCheckerParameter) {
-        super(fsm);
-        this.parameter = parameter
+    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter?: SpellCheckerParameter) {
+        super(fsm, parameter)
         this.nGram = nGram
     }
 

@@ -5,12 +5,10 @@ import {
 } from "nlptoolkit-morphologicalanalysis/dist/MorphologicalAnalysis/FsmMorphologicalAnalyzer";
 import {NGram} from "nlptoolkit-ngram/dist/NGram";
 import {SpellCheckerParameter} from "./SpellCheckerParameter";
-import * as fs from "fs";
 import {Word} from "nlptoolkit-dictionary/dist/Dictionary/Word";
 import {Sentence} from "nlptoolkit-corpus/dist/Sentence";
 import {Candidate} from "./Candidate";
 import {TrieCandidate} from "./TrieCandidate";
-import * as Console from "console";
 import {Queue} from "nlptoolkit-datastructure/dist/Queue";
 
 export class TrieBasedSpellChecker extends NGramSpellChecker{
@@ -26,7 +24,7 @@ export class TrieBasedSpellChecker extends NGramSpellChecker{
      * @param nGram     {@link NGram} type input.
      * @param parameter {@link SpellCheckerParameter} type input.
      */
-    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter: SpellCheckerParameter) {
+    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter?: SpellCheckerParameter) {
         super(fsm, nGram, parameter);
         this.loadTrieDictionaries()
         this.prepareTrie()
@@ -38,7 +36,7 @@ export class TrieBasedSpellChecker extends NGramSpellChecker{
      */
     protected loadTrieDictionaries(){
         this.generatedWords = new Array<string>()
-        let data = fs.readFileSync("generated_words.txt", 'utf8')
+        let data = this.getFile("generated_words.txt")
         let lines = data.split("\n")
         for (let line of lines){
             this.generatedWords.push(line)

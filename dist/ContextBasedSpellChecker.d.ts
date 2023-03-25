@@ -15,7 +15,7 @@ export declare class ContextBasedSpellChecker extends NGramSpellChecker {
      * @param nGram     {@link NGram} type input.
      * @param parameter {@link SpellCheckerParameter} type input.
      */
-    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter: SpellCheckerParameter);
+    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter?: SpellCheckerParameter);
     /**
      * {@inheritDoc}
      * This method also loads context information from a file.

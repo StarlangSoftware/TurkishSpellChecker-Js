@@ -22,6 +22,7 @@
             this.deMiCheck = true;
             this.rootNGram = true;
             this.minWordLength = 4;
+            this.domain = "";
         }
         /**
          * Sets the threshold value used in calculating the n-gram probabilities.
@@ -58,6 +59,14 @@
             this.minWordLength = minWordLength;
         }
         /**
+         * Sets the _domain name to the specified value.
+         *
+         * @param domain the new _domain name to set for this object
+         */
+        setDomain(domain) {
+            this.domain = domain;
+        }
+        /**
          * Returns the threshold value used in calculating the n-gram probabilities.
          *
          * @return the threshold for the spell checker
@@ -90,6 +99,14 @@
          */
         getMinWordLength() {
             return this.minWordLength;
+        }
+        /**
+         * Returns the domain name
+         *
+         * @return the domain name
+         */
+        getDomain() {
+            return this.domain;
         }
     }
     exports.SpellCheckerParameter = SpellCheckerParameter;

@@ -4,6 +4,7 @@ export class SpellCheckerParameter {
     private deMiCheck: boolean
     private rootNGram: boolean
     private minWordLength: number
+    private domain: string
 
     /**
      * Constructs a SpellCheckerParameter object with default values.
@@ -16,6 +17,7 @@ export class SpellCheckerParameter {
         this.deMiCheck = true
         this.rootNGram = true
         this.minWordLength = 4
+        this.domain = ""
     }
 
     /**
@@ -57,6 +59,15 @@ export class SpellCheckerParameter {
     }
 
     /**
+     * Sets the _domain name to the specified value.
+     *
+     * @param domain the new _domain name to set for this object
+     */
+    public setDomain(domain: string){
+        this.domain = domain
+    }
+
+    /**
      * Returns the threshold value used in calculating the n-gram probabilities.
      *
      * @return the threshold for the spell checker
@@ -92,6 +103,15 @@ export class SpellCheckerParameter {
      */
     public getMinWordLength(): number{
         return this.minWordLength
+    }
+
+    /**
+     * Returns the domain name
+     *
+     * @return the domain name
+     */
+    public getDomain(): string{
+        return this.domain
     }
 
 }

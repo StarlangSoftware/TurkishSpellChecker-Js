@@ -3,6 +3,7 @@ export declare class SpellCheckerParameter {
     private deMiCheck;
     private rootNGram;
     private minWordLength;
+    private domain;
     /**
      * Constructs a SpellCheckerParameter object with default values.
      *
@@ -37,6 +38,12 @@ export declare class SpellCheckerParameter {
      */
     setMinWordLength(minWordLength: number): void;
     /**
+     * Sets the _domain name to the specified value.
+     *
+     * @param domain the new _domain name to set for this object
+     */
+    setDomain(domain: string): void;
+    /**
      * Returns the threshold value used in calculating the n-gram probabilities.
      *
      * @return the threshold for the spell checker
@@ -62,4 +69,10 @@ export declare class SpellCheckerParameter {
      * @return the minimum word length for the spell checker
      */
     getMinWordLength(): number;
+    /**
+     * Returns the domain name
+     *
+     * @return the domain name
+     */
+    getDomain(): string;
 }

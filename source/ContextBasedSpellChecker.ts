@@ -4,7 +4,6 @@ import {
 } from "nlptoolkit-morphologicalanalysis/dist/MorphologicalAnalysis/FsmMorphologicalAnalyzer";
 import {NGram} from "nlptoolkit-ngram/dist/NGram";
 import {SpellCheckerParameter} from "./SpellCheckerParameter";
-import * as fs from "fs";
 import {Word} from "nlptoolkit-dictionary/dist/Dictionary/Word";
 import {Sentence} from "nlptoolkit-corpus/dist/Sentence";
 import {Candidate} from "./Candidate";
@@ -22,7 +21,7 @@ export class ContextBasedSpellChecker extends NGramSpellChecker{
      * @param nGram     {@link NGram} type input.
      * @param parameter {@link SpellCheckerParameter} type input.
      */
-    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter: SpellCheckerParameter) {
+    constructor(fsm: FsmMorphologicalAnalyzer, nGram: NGram<string>, parameter?: SpellCheckerParameter) {
         super(fsm, nGram, parameter);
         this.loadContextDictionaries();
     }
@@ -33,7 +32,7 @@ export class ContextBasedSpellChecker extends NGramSpellChecker{
      */
     protected loadContextDictionaries(){
         this.contextList = new Map<string, Array<string>>()
-        let data = fs.readFileSync("context_list.txt", 'utf8')
+        let data = this.getFile("context_list.txt")
         let lines = data.split("\n")
         for (let line of lines){
             let items = line.split("\t")

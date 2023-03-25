@@ -9,10 +9,12 @@ import {Candidate} from "./Candidate";
 import {Operator} from "./Operator";
 import * as fs from "fs";
 import {TxtWord} from "nlptoolkit-dictionary/dist/Dictionary/TxtWord";
+import {SpellCheckerParameter} from "./SpellCheckerParameter";
 
 export class SimpleSpellChecker implements SpellChecker{
 
     protected fsm: FsmMorphologicalAnalyzer
+    protected parameter: SpellCheckerParameter
     protected mergedWords: Map<string, string> = new Map<string, string>()
     protected splitWords: Map<string, string> = new Map<string, string>()
     private shortcuts: Array<string> = ["cc", "cm2", "cm", "gb", "ghz", "gr", "gram", "hz", "inc", "inch", "inç",
@@ -101,10 +103,24 @@ export class SimpleSpellChecker implements SpellChecker{
      * assigns it to the fsm variable.
      *
      * @param fsm {@link FsmMorphologicalAnalyzer} type input.
+     * @param parameter {@link SpellCheckerParameter} type input.
      */
-    constructor(fsm: FsmMorphologicalAnalyzer) {
+    constructor(fsm: FsmMorphologicalAnalyzer, parameter?: SpellCheckerParameter) {
         this.fsm = fsm
+        if (parameter == undefined){
+            this.parameter = new SpellCheckerParameter()
+        } else {
+            this.parameter = parameter
+        }
         this.loadDictionaries()
+    }
+
+    getFile(fileName: string): string{
+        if (this.parameter.getDomain().length == 0){
+            return fs.readFileSync(fileName, 'utf8')
+        } else {
+            return fs.readFileSync(this.parameter.getDomain() + "_" + fileName, 'utf8')
+        }
     }
 
     /**
@@ -380,13 +396,13 @@ export class SimpleSpellChecker implements SpellChecker{
     }
 
     private loadDictionaries(){
-        let data = fs.readFileSync("merged.txt", 'utf8')
+        let data = this.getFile("merged.txt")
         let lines = data.split("\n")
         for (let line of lines){
             let list = line.split(" ")
             this.mergedWords.set(list[0] + " " + list[1], list[2])
         }
-        data = fs.readFileSync("split.txt", 'utf8')
+        data = this.getFile("split.txt")
         lines = data.split("\n")
         for (let line of lines){
             let index = line.indexOf(" ")

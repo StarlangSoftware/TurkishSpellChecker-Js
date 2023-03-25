@@ -4,14 +4,13 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./NGramSpellChecker", "fs", "nlptoolkit-dictionary/dist/Dictionary/Word", "./Candidate", "./Operator"], factory);
+        define(["require", "exports", "./NGramSpellChecker", "nlptoolkit-dictionary/dist/Dictionary/Word", "./Candidate", "./Operator"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ContextBasedSpellChecker = void 0;
     const NGramSpellChecker_1 = require("./NGramSpellChecker");
-    const fs = require("fs");
     const Word_1 = require("nlptoolkit-dictionary/dist/Dictionary/Word");
     const Candidate_1 = require("./Candidate");
     const Operator_1 = require("./Operator");
@@ -34,7 +33,7 @@
          */
         loadContextDictionaries() {
             this.contextList = new Map();
-            let data = fs.readFileSync("context_list.txt", 'utf8');
+            let data = this.getFile("context_list.txt");
             let lines = data.split("\n");
             for (let line of lines) {
                 let items = line.split("\t");

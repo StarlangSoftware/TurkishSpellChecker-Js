@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./NGramSpellChecker", "./Trie", "fs", "./TrieCandidate", "nlptoolkit-datastructure/dist/Queue"], factory);
+        define(["require", "exports", "./NGramSpellChecker", "./Trie", "./TrieCandidate", "nlptoolkit-datastructure/dist/Queue"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -12,7 +12,6 @@
     exports.TrieBasedSpellChecker = void 0;
     const NGramSpellChecker_1 = require("./NGramSpellChecker");
     const Trie_1 = require("./Trie");
-    const fs = require("fs");
     const TrieCandidate_1 = require("./TrieCandidate");
     const Queue_1 = require("nlptoolkit-datastructure/dist/Queue");
     class TrieBasedSpellChecker extends NGramSpellChecker_1.NGramSpellChecker {
@@ -35,7 +34,7 @@
          */
         loadTrieDictionaries() {
             this.generatedWords = new Array();
-            let data = fs.readFileSync("generated_words.txt", 'utf8');
+            let data = this.getFile("generated_words.txt");
             let lines = data.split("\n");
             for (let line of lines) {
                 this.generatedWords.push(line);

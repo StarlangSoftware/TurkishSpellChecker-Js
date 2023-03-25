@@ -3,8 +3,10 @@ import { Sentence } from "nlptoolkit-corpus/dist/Sentence";
 import { FsmMorphologicalAnalyzer } from "nlptoolkit-morphologicalanalysis/dist/MorphologicalAnalysis/FsmMorphologicalAnalyzer";
 import { Word } from "nlptoolkit-dictionary/dist/Dictionary/Word";
 import { Candidate } from "./Candidate";
+import { SpellCheckerParameter } from "./SpellCheckerParameter";
 export declare class SimpleSpellChecker implements SpellChecker {
     protected fsm: FsmMorphologicalAnalyzer;
+    protected parameter: SpellCheckerParameter;
     protected mergedWords: Map<string, string>;
     protected splitWords: Map<string, string>;
     private shortcuts;
@@ -40,8 +42,10 @@ export declare class SimpleSpellChecker implements SpellChecker {
      * assigns it to the fsm variable.
      *
      * @param fsm {@link FsmMorphologicalAnalyzer} type input.
+     * @param parameter {@link SpellCheckerParameter} type input.
      */
-    constructor(fsm: FsmMorphologicalAnalyzer);
+    constructor(fsm: FsmMorphologicalAnalyzer, parameter?: SpellCheckerParameter);
+    getFile(fileName: string): string;
     /**
      * The spellCheck method takes a {@link Sentence} as an input and loops i times where i ranges from 0 to size of words in given sentence.
      * Then, it calls morphologicalAnalysis method with each word and assigns it to the {@link FsmParseList}, if the size of
