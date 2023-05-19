@@ -154,8 +154,9 @@ export class SimpleSpellChecker implements SpellChecker{
                 i++
                 continue
             }
-            if (this.forcedSplitCheck(word, result) || this.forcedShortcutSplitCheck(word, result)
-                || this.forcedDeDaSplitCheck(word, result) || this.forcedQuestionSuffixSplitCheck(word, result)){
+            if (this.forcedSplitCheck(word, result) || this.forcedShortcutCheck(word, result)
+                || this.forcedDeDaSplitCheck(word, result) || this.forcedQuestionSuffixSplitCheck(word, result)
+                || this.forcedSuffixSplitCheck(word, result)){
                 continue
             }
             let fsmParseList = this.fsm.morphologicalAnalysis(word.getName());
@@ -194,6 +195,14 @@ export class SimpleSpellChecker implements SpellChecker{
         return result
     }
 
+    /**
+     * Checks if the given word is a misspelled word according to the misspellings list,
+     * and if it is, then replaces it with its correct form in the given sentence.
+     *
+     * @param word   the {@link Word} to check for misspelling
+     * @param result the {@link Sentence} that the word belongs to
+     * @return true if the word was corrected, false otherwise
+     */
     protected forcedMisspellCheck(word: Word, result: Sentence): boolean{
         let forcedReplacement = this.fsm.getDictionary().getCorrectForm(word.getName())
         if (forcedReplacement != undefined){
@@ -203,6 +212,15 @@ export class SimpleSpellChecker implements SpellChecker{
         return false
     }
 
+    /**
+     * Checks if the given word and its preceding word need to be merged according to the merged list.
+     * If the merge is needed, the word and its preceding word are replaced with their merged form in the given sentence.
+     *
+     * @param word         the {@link Word} to check for merge
+     * @param result       the {@link Sentence} that the word belongs to
+     * @param previousWord the preceding {@link Word} of the given {@link Word}
+     * @return true if the word was merged, false otherwise
+     */
     protected forcedBackwardMergeCheck(word: Word, result: Sentence, previousWord: Word): boolean{
         if (previousWord != null){
             let forcedReplacement = this.getCorrectForm(result.getWord(result.wordCount() - 1).getName() + " " + word.getName(), this.mergedWords)
@@ -214,6 +232,15 @@ export class SimpleSpellChecker implements SpellChecker{
         return false
     }
 
+    /**
+     * Checks if the given word and its next word need to be merged according to the merged list.
+     * If the merge is needed, the word and its next word are replaced with their merged form in the given sentence.
+     *
+     * @param word     the {@link Word} to check for merge
+     * @param result   the {@link Sentence} that the word belongs to
+     * @param nextWord the next {@link Word} of the given {@link Word}
+     * @return true if the word was merged, false otherwise
+     */
     protected forcedForwardMergeCheck(word: Word, result: Sentence, nextWord: Word): boolean{
         if (nextWord != null){
             let forcedReplacement = this.getCorrectForm(word.getName() + " " + nextWord.getName(), this.mergedWords)
@@ -225,6 +252,12 @@ export class SimpleSpellChecker implements SpellChecker{
         return false
     }
 
+    /**
+     * Given a multiword form, splits it and adds it to the given sentence.
+     *
+     * @param multiWord multiword form to split
+     * @param result    the {@link Sentence} to add the split words to
+     */
     protected addSplitWords(multiWord: string, result: Sentence){
         let words = multiWord.split(" ")
         for (let word of words){
@@ -232,6 +265,14 @@ export class SimpleSpellChecker implements SpellChecker{
         }
     }
 
+    /**
+     * Checks if the given word needs to be split according to the split list.
+     * If the split is needed, the word is replaced with its split form in the given sentence.
+     *
+     * @param word   the {@link Word} to check for split
+     * @param result the {@link Sentence} that the word belongs to
+     * @return true if the word was split, false otherwise
+     */
     protected forcedSplitCheck(word: Word, result: Sentence): boolean{
         let forcedReplacement = this.getCorrectForm(word.getName(), this.splitWords)
         if (forcedReplacement != null){
@@ -241,7 +282,15 @@ export class SimpleSpellChecker implements SpellChecker{
         return false
     }
 
-    protected forcedShortcutSplitCheck(word: Word, result: Sentence): boolean{
+    /**
+     * Checks if the given word is a shortcut form, such as "5kg" or "2.5km".
+     * If it is, it splits the word into its number and unit form and adds them to the given sentence.
+     *
+     * @param word   the {@link Word} to check for shortcut split
+     * @param result the {@link Sentence} that the word belongs to
+     * @return true if the word was split, false otherwise
+     */
+    protected forcedShortcutCheck(word: Word, result: Sentence): boolean{
         let shortcutRegex = "(([1-9][0-9]*)|[0])(([.]|[,])[0-9]*)?(" + this.shortcuts[0]
         for (let i = 1; i < this.shortcuts.length; i++){
             shortcutRegex += "|" + this.shortcuts[i]
@@ -261,6 +310,14 @@ export class SimpleSpellChecker implements SpellChecker{
         return false
     }
 
+    /**
+     * Checks if the given word has a "da" or "de" suffix that needs to be split according to a predefined set of rules.
+     * If the split is needed, the word is replaced with its bare form and "da" or "de" in the given sentence.
+     *
+     * @param word   the {@link Word} to check for "da" or "de" split
+     * @param result the {@link Sentence} that the word belongs to
+     * @return true if the word was split, false otherwise
+     */
     protected forcedDeDaSplitCheck(word: Word, result: Sentence): boolean{
         let wordName = word.getName()
         let capitalizedWordName = Word.toCapital(wordName)
@@ -271,11 +328,12 @@ export class SimpleSpellChecker implements SpellChecker{
                 let fsmParseList = this.fsm.morphologicalAnalysis(newWordName)
                 let txtNewWord = this.fsm.getDictionary().getWord(newWordName.toLocaleLowerCase("tr"))
                 if (txtNewWord != undefined && txtNewWord instanceof TxtWord && txtNewWord.isProperNoun()) {
-                    if (this.fsm.morphologicalAnalysis(newWordName + "'" + "da").size() > 0) {
-                        result.addWord(new Word(newWordName + "'" + "da"))
+                    let newWordNameCapitalized = Word.toCapital(newWordName)
+                    if (this.fsm.morphologicalAnalysis(newWordNameCapitalized + "'" + "da").size() > 0) {
+                        result.addWord(new Word(newWordNameCapitalized + "'" + "da"))
                     }
                     else {
-                        result.addWord(new Word(newWordName + "'" + "de"))
+                        result.addWord(new Word(newWordNameCapitalized + "'" + "de"))
                     }
                     return true
                 }
@@ -304,6 +362,15 @@ export class SimpleSpellChecker implements SpellChecker{
         return false
     }
 
+    /**
+     * Checks if the given word is a suffix like 'li' or 'lik' that needs to be merged with its preceding word which is a number.
+     * If the merge is needed, the word and its preceding word are replaced with their merged form in the given sentence.
+     *
+     * @param word         the {@link Word} to check for merge
+     * @param result     the {@link Sentence} that the word belongs to
+     * @param previousWord the preceding {@link Word} of the given {@link Word}
+     * @return true if the word was merged, false otherwise
+     */
     protected forcedSuffixMergeCheck(word: Word, result: Sentence, previousWord: Word): boolean{
         let liList = ["li", "lı", "lu", "lü"]
         let likList = ["lik", "lık", "luk", "lük"]
@@ -326,6 +393,19 @@ export class SimpleSpellChecker implements SpellChecker{
         return false
     }
 
+    /**
+     * Checks whether the next word and the previous word can be merged if the current word is a hyphen,
+     * an en-dash or an em-dash.
+     * If the previous word and the next word exist and they are valid words,
+     * it merges the previous word and the next word into a single word and add the new word to the sentence
+     * If the merge is valid, it returns true.
+     *
+     * @param word         current {@link Word}
+     * @param result       the {@link Sentence} that the word belongs to
+     * @param previousWord the {@link Word} before current word
+     * @param nextWord     the {@link Word} after current word
+     * @return true if merge is valid, false otherwise
+     */
     protected forcedHyphenMergeCheck(word: Word, result: Sentence, previousWord: Word, nextWord: Word): boolean{
         if (word.getName() == "-" || word.getName() == "–" || word.getName() == "—") {
             if (previousWord != null && nextWord != null &&
@@ -340,6 +420,15 @@ export class SimpleSpellChecker implements SpellChecker{
         return false
     }
 
+    /**
+     * Checks whether the current word ends with a valid question suffix and split it if it does.
+     * It splits the word with the question suffix and adds the two new words to the sentence.
+     * If the split is valid, it returns true.
+     *
+     * @param word   current {@link Word}
+     * @param result the {@link Sentence} that the word belongs to
+     * @return true if split is valid, false otherwise
+     */
     protected forcedQuestionSuffixSplitCheck(word: Word, result: Sentence): boolean{
         let wordName = word.getName()
         if (this.fsm.morphologicalAnalysis(wordName).size() > 0) {
@@ -347,10 +436,13 @@ export class SimpleSpellChecker implements SpellChecker{
         }
         for (let questionSuffix of this.questionSuffixList) {
             if (wordName.endsWith(questionSuffix)) {
-                let newWordName = wordName.substring(0, wordName.lastIndexOf(questionSuffix))
-                let txtWord = this.fsm.getDictionary().getWord(newWordName)
-                if (this.fsm.morphologicalAnalysis(newWordName).size() > 0 && txtWord != undefined && txtWord instanceof TxtWord && !txtWord.isCode()) {
-                    result.addWord(new Word(newWordName))
+                let splitWordName = wordName.substring(0, wordName.lastIndexOf(questionSuffix))
+                if (this.fsm.morphologicalAnalysis(splitWordName).size() < 1) {
+                    return false;
+                }
+                let splitWordRoot = this.fsm.getDictionary().getWord(this.fsm.morphologicalAnalysis(splitWordName).getParseWithLongestRootWord().getWord().getName())
+                if (this.fsm.morphologicalAnalysis(splitWordName).size() > 0 && splitWordRoot != undefined && splitWordRoot instanceof TxtWord && !splitWordRoot.isCode()) {
+                    result.addWord(new Word(splitWordName))
                     result.addWord(new Word(questionSuffix))
                     return true
                 }
@@ -359,6 +451,39 @@ export class SimpleSpellChecker implements SpellChecker{
         return false
     }
 
+    /**
+     * Checks whether the given {@link Word} can be split into a proper noun and a suffix, with an apostrophe in between
+     * and adds the split result to the {@link Sentence} if it's valid.
+     *
+     * @param word the {@link Word} to check for forced suffix split.
+     * @param result the {@link Sentence} that the word belongs to
+     * @return true if the split is successful, false otherwise.
+     */
+    protected forcedSuffixSplitCheck(word: Word, result: Sentence){
+        let wordName = word.getName()
+        if (this.fsm.morphologicalAnalysis(wordName).size() > 0) {
+            return false;
+        }
+        for (let i = 1; i < wordName.length; i++) {
+            let probableProperNoun = Word.toCapital(wordName).substring(0, i)
+            let probableSuffix = wordName.substring(i)
+            let apostropheWord = probableProperNoun + "'" + probableSuffix
+            let txtWord = this.fsm.getDictionary().getWord(probableProperNoun.toLocaleLowerCase("tr"));
+            if (txtWord != undefined && txtWord instanceof TxtWord && txtWord.isProperNoun() && this.fsm.morphologicalAnalysis(apostropheWord).size() > 0) {
+                result.addWord(new Word(apostropheWord))
+                return true
+            }
+        }
+        return false
+    }
+    /**
+     * Generates a list of merged candidates for the word and previous and next words.
+     *
+     * @param previousWord The previous {@link Word} in the sentence.
+     * @param word         The {@link Word} currently being checked.
+     * @param nextWord     The next {@link Word} in the sentence.
+     * @return A list of merged candidates.
+     */
     protected mergedCandidatesList(previousWord: Word, word: Word, nextWord: Word): Array<Candidate>{
         let mergedCandidates = new Array<Candidate>()
         let backwardMergeCandidate = null
@@ -381,6 +506,12 @@ export class SimpleSpellChecker implements SpellChecker{
         return mergedCandidates
     }
 
+    /**
+     * Generates a list of split candidates for the given word.
+     *
+     * @param word The {@link Word} currently being checked.
+     * @return A list of split candidates.
+     */
     protected splitCandidatesList(word: Word): Array<Candidate>{
         let splitCandidates = new Array<Candidate>();
         for (let i = 4; i < word.getName().length - 3; i++) {
@@ -395,6 +526,9 @@ export class SimpleSpellChecker implements SpellChecker{
         return splitCandidates
     }
 
+    /**
+     * Loads the merged and split lists from the specified files.
+     */
     private loadDictionaries(){
         let data = this.getFile("merged.txt")
         let lines = data.split("\n")
@@ -419,11 +553,17 @@ export class SimpleSpellChecker implements SpellChecker{
         return null
     }
 
+    /**
+     * Splits a word into two parts, a key and a value, based on the first non-numeric/non-punctuation character.
+     *
+     * @param word the {@link Word} object to split
+     * @return an {@link AbstractMap.SimpleEntry} object containing the key (numeric/punctuation characters) and the value (remaining characters)
+     */
     private getSplitPair(word: Word): [string, string]{
         let key = "";
         let j = 0
         while (j < word.getName().length){
-            if (word.getName().charAt(j) >= '0' && word.getName().charAt(j) <= '9') {
+            if (word.getName().charAt(j) >= '0' && word.getName().charAt(j) <= '9' || word.getName().charAt(j) == '.' || word.getName().charAt(j) == ',') {
                 key += word.getName().charAt(j)
             } else {
                 break

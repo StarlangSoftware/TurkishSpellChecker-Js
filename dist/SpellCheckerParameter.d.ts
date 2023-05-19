@@ -1,6 +1,6 @@
 export declare class SpellCheckerParameter {
     private threshold;
-    private deMiCheck;
+    private suffixCheck;
     private rootNGram;
     private minWordLength;
     private domain;
@@ -22,9 +22,9 @@ export declare class SpellCheckerParameter {
      * @see SimpleSpellChecker#forcedDeDaSplitCheck(Word, Sentence)
      * @see SimpleSpellChecker#forcedQuestionSuffixSplitCheck(Word, Sentence) (Word, Sentence)
      *
-     * @param deMiCheck a boolean indicating whether the De-Mi check should be enabled (true) or disabled (false)
+     * @param suffixCheck a boolean indicating whether the De-Mi check should be enabled (true) or disabled (false)
      */
-    setDeMiCheck(deMiCheck: boolean): void;
+    setSuffixCheck(suffixCheck: boolean): void;
     /**
      * Enables or disables the root n-gram for the spell checker.
      *
@@ -56,7 +56,7 @@ export declare class SpellCheckerParameter {
      *
      * @return a boolean indicating whether De-Mi check is enabled for the spell checker
      */
-    isDeMiCheck(): boolean;
+    isSuffixCheck(): boolean;
     /**
      * Returns whether the root n-gram is enabled for the spell checker.
      *

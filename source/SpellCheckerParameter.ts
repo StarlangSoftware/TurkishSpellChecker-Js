@@ -1,7 +1,7 @@
 export class SpellCheckerParameter {
 
     private threshold: number
-    private deMiCheck: boolean
+    private suffixCheck: boolean
     private rootNGram: boolean
     private minWordLength: number
     private domain: string
@@ -14,7 +14,7 @@ export class SpellCheckerParameter {
      */
     constructor() {
         this.threshold = 0.0
-        this.deMiCheck = true
+        this.suffixCheck = true
         this.rootNGram = true
         this.minWordLength = 4
         this.domain = ""
@@ -34,10 +34,10 @@ export class SpellCheckerParameter {
      * @see SimpleSpellChecker#forcedDeDaSplitCheck(Word, Sentence)
      * @see SimpleSpellChecker#forcedQuestionSuffixSplitCheck(Word, Sentence) (Word, Sentence)
      *
-     * @param deMiCheck a boolean indicating whether the De-Mi check should be enabled (true) or disabled (false)
+     * @param suffixCheck a boolean indicating whether the De-Mi check should be enabled (true) or disabled (false)
      */
-    public setDeMiCheck(deMiCheck: boolean){
-        this.deMiCheck = deMiCheck
+    public setSuffixCheck(suffixCheck: boolean){
+        this.suffixCheck = suffixCheck
     }
 
     /**
@@ -83,8 +83,8 @@ export class SpellCheckerParameter {
      *
      * @return a boolean indicating whether De-Mi check is enabled for the spell checker
      */
-    public isDeMiCheck(): boolean{
-        return this.deMiCheck
+    public isSuffixCheck(): boolean{
+        return this.suffixCheck
     }
 
     /**

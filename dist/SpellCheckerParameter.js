@@ -19,7 +19,7 @@
          */
         constructor() {
             this.threshold = 0.0;
-            this.deMiCheck = true;
+            this.suffixCheck = true;
             this.rootNGram = true;
             this.minWordLength = 4;
             this.domain = "";
@@ -37,10 +37,10 @@
          * @see SimpleSpellChecker#forcedDeDaSplitCheck(Word, Sentence)
          * @see SimpleSpellChecker#forcedQuestionSuffixSplitCheck(Word, Sentence) (Word, Sentence)
          *
-         * @param deMiCheck a boolean indicating whether the De-Mi check should be enabled (true) or disabled (false)
+         * @param suffixCheck a boolean indicating whether the De-Mi check should be enabled (true) or disabled (false)
          */
-        setDeMiCheck(deMiCheck) {
-            this.deMiCheck = deMiCheck;
+        setSuffixCheck(suffixCheck) {
+            this.suffixCheck = suffixCheck;
         }
         /**
          * Enables or disables the root n-gram for the spell checker.
@@ -81,8 +81,8 @@
          *
          * @return a boolean indicating whether De-Mi check is enabled for the spell checker
          */
-        isDeMiCheck() {
-            return this.deMiCheck;
+        isSuffixCheck() {
+            return this.suffixCheck;
         }
         /**
          * Returns whether the root n-gram is enabled for the spell checker.

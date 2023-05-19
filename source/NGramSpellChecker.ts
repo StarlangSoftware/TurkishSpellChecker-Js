@@ -152,14 +152,14 @@ export class NGramSpellChecker extends SimpleSpellChecker{
                 nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2)
                 continue
             }
-            if (this.forcedSplitCheck(word, result) || this.forcedShortcutSplitCheck(word, result)){
+            if (this.forcedSplitCheck(word, result) || this.forcedShortcutCheck(word, result)){
                 previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1)
                 root = nextRoot
                 nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2)
                 continue
             }
-            if (this.parameter.isDeMiCheck()) {
-                if (this.forcedDeDaSplitCheck(word, result) || this.forcedQuestionSuffixSplitCheck(word, result)) {
+            if (this.parameter.isSuffixCheck()) {
+                if (this.forcedDeDaSplitCheck(word, result) || this.forcedSuffixSplitCheck(word, result) || this.forcedQuestionSuffixSplitCheck(word, result)) {
                     previousRoot = this.checkAnalysisAndSetRootForWordAtIndex(result, result.wordCount() - 1)
                     root = nextRoot
                     nextRoot = this.checkAnalysisAndSetRootForWordAtIndex(sentence, i + 2)
