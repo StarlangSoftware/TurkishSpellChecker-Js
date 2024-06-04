@@ -45,6 +45,11 @@ export declare class SimpleSpellChecker implements SpellChecker {
      * @param parameter {@link SpellCheckerParameter} type input.
      */
     constructor(fsm: FsmMorphologicalAnalyzer, parameter?: SpellCheckerParameter);
+    /**
+     * Opens and returns a file reader of a given file name.
+     * @param fileName File to read
+     * @return File reader of the given file.
+     */
     getFile(fileName: string): string;
     /**
      * The spellCheck method takes a {@link Sentence} as an input and loops i times where i ranges from 0 to size of words in given sentence.
@@ -184,6 +189,13 @@ export declare class SimpleSpellChecker implements SpellChecker {
      * Loads the merged and split lists from the specified files.
      */
     private loadDictionaries;
+    /**
+     * Returns the correct form of a given word by looking it up in the provided dictionary.
+     *
+     * @param wordName   the name of the word to look up in the dictionary
+     * @param dictionary the dictionary to use for looking up the word
+     * @return the correct form of the word, as stored in the dictionary, or null if the word is not found
+     */
     protected getCorrectForm(wordName: string, dictionary: Map<string, string>): string;
     /**
      * Splits a word into two parts, a key and a value, based on the first non-numeric/non-punctuation character.

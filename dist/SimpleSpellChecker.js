@@ -117,6 +117,11 @@
             }
             return candidates;
         }
+        /**
+         * Opens and returns a file reader of a given file name.
+         * @param fileName File to read
+         * @return File reader of the given file.
+         */
         getFile(fileName) {
             if (this.parameter.getDomain().length == 0) {
                 return fs.readFileSync(fileName, 'utf8');
@@ -537,6 +542,13 @@
                 this.splitWords.set(word, splitWords);
             }
         }
+        /**
+         * Returns the correct form of a given word by looking it up in the provided dictionary.
+         *
+         * @param wordName   the name of the word to look up in the dictionary
+         * @param dictionary the dictionary to use for looking up the word
+         * @return the correct form of the word, as stored in the dictionary, or null if the word is not found
+         */
         getCorrectForm(wordName, dictionary) {
             if (dictionary.has(wordName)) {
                 return dictionary.get(wordName);
